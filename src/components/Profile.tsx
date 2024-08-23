@@ -8,7 +8,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
-import { auth, db } from "../firebase";
+import { auth, db, deletePost } from "../firebase";
 import { Link, useNavigate } from "react-router-dom";
 
 interface Post {
@@ -58,6 +58,17 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleDelete = async (postId: string, imageUrl: string | null) => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      try {
+        await deletePost(postId, imageUrl);
+        // The post will be automatically removed from the UI due to the real-time listener
+      } catch (error) {
+        console.error("Error deleting post:", error);
+      }
+    }
+  };
+
   if (!user) {
     return (
       <div className="profile p-4">
@@ -97,6 +108,12 @@ const Profile: React.FC = () => {
               />
             )}
             <p className="text-gray-800">{post.text}</p>
+            <button
+              onClick={() => handleDelete(post.id, post.imageUrl)}
+              className="mt-2 bg-red-500 text-white px-3 py-1 rounded"
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>

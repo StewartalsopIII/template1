@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, deleteDoc, doc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { getStorage, deleteObject, ref } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,5 +17,21 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+
+export const deletePost = async (postId: string, imageUrl: string | null) => {
+  try {
+    // Delete the post document from Firestore
+    await deleteDoc(doc(db, "posts", postId));
+
+    // If there's an associated image, delete it from Storage
+    if (imageUrl) {
+      const imageRef = ref(storage, imageUrl);
+      await deleteObject(imageRef);
+    }
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    throw error;
+  }
+};
 
 export { db, auth, storage };
